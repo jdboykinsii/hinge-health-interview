@@ -3,16 +3,29 @@ import {useState, useEffect} from 'react'
 import './index.css'
 import staticData from './data.json';
 
+/*
+    TODO: These are just some ideas, but could be fun to implement:
+    [] What if we used static pathing instead of having to recursively find nested animals?
+    [] What about having limits to the levels of nesting?
+    [] What about adding an accordion or show/hide based on which level the user clicks on?
+
+ */
+
 export default function Tree() {
     const [animalTreeData, setAnimalTreeData] = useState(staticData);
 
     let stringAsTree = "";
     /*
+
+    Problem:
+    We need to create a structure that can be easily inspected, compiles to HTML, and can eventually
+    be rendered on the page as a DOM element.
+
      Approach:
      We'll be given an object.
-     we'll prepend a <ul>
+     we'll prepend a <ul> to our string representation of a tree.
      For every key:
-         We'll create a node.
+         We'll create a node, represented as a <li> element.
          We'll treat the "name" of that key as the name of the animal to print.
          If the key  "name" has a value of an empty object:
              we'll consider that node to be complete, and will append
@@ -43,6 +56,10 @@ export default function Tree() {
 
     parseTree(animalTreeData);
 
+    /*
+        Here, we handle updating the tree by first recursively searching for the property we need to update.
+        If that value is found, we update the tree.
+     */
     const updateInTree = (tag, dataToAppend) => {
         const searchTree = (obj, tag) => {
 
@@ -70,6 +87,14 @@ export default function Tree() {
         return treeClone;
     }
 
+    /*
+        This handles detecting when the user has finished adding a new item.
+        Because there was no requirement to add a "submit" button, we just cleared up the UI by
+        not having one to begin with.
+
+        Additionally, this method handles updating state with the tree once any additions have been
+        made.
+     */
     const handleChange = (evt) => {
         if (evt.key === "Enter") {
             let tag = evt.target.getAttribute("data-key");
@@ -85,6 +110,10 @@ export default function Tree() {
         }
     }
 
+    /*
+        Because we're building the UI from a string, every time it changes we'll need to
+        re-bind the event handlers.
+     */
     const bindEventHandlers = () => {
         const treeElem = document.querySelector('.tree');
         const input = treeElem.querySelectorAll('input');
