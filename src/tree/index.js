@@ -1,9 +1,12 @@
 import React from 'react';
+import {useState, useEffect} from 'react'
 import './index.css'
 import staticData from './data.json';
-import {renderToString} from "react-dom/server";
 
 export default function Tree() {
+    const [animalTreeData, setAnimalTreeData] = useState(staticData);
+    const [newTreeData, setNewTreeData] = useState({});
+
     let stringAsTree = "";
     /*
      Approach:
@@ -26,11 +29,11 @@ export default function Tree() {
     const parseTree = (passedObj) => {
         stringAsTree += '<ul class="animalTree">';
 
-        for(const [key, value] of Object.entries(passedObj)){
-            if(Object.keys(passedObj[key]).length === 0){
-                stringAsTree += `<li><a>${key}</a></li>`;
+        for (const [key, value] of Object.entries(passedObj)) {
+            if (Object.keys(passedObj[key]).length === 0) {
+                stringAsTree += `<li><a>${key}</a><input id="animalInput" data-key="${key}"/></li>`;
             } else {
-                stringAsTree += `<li><a>${key}</a>`
+                stringAsTree += `<li><a>${key}</a><input id="animalInput" data-key="${key}"/>`
                 parseTree(passedObj[key]);
                 stringAsTree += "</li>";
             }
@@ -39,8 +42,49 @@ export default function Tree() {
         stringAsTree += "</ul>";
     }
 
-    parseTree(staticData);
+    parseTree(animalTreeData);
 
+    const updateInTree = (tag, dataToAppend) => {
+        const searchTree = (obj, tag) => {
+            for (const key in obj) {
+                if (obj.hasOwnProperty(key)) {
+                    if (key === tag) {
+                        obj[key] = {...obj[key], [dataToAppend]: {}};
+                    } else if (typeof obj[key] === 'object') {
+                        return searchTree(obj[key], tag);
+                    }
+                }
+            }
+        }
+
+        let treeClone = Object.assign(animalTreeData);
+        searchTree(treeClone, tag);
+
+        return treeClone;
+    }
+
+    const handleChange = (evt) => {
+        if (evt.key === "Enter") {
+            let tag = evt.target.getAttribute("data-key");
+            let newValue = evt.target.value;
+
+            let newTreeData = updateInTree(tag, newValue);
+
+            setAnimalTreeData(newTreeData);
+
+            evt.target.value = "";
+        }
+    }
+
+    useEffect(() => {
+        const treeElem = document.querySelector('.tree');
+        const input = treeElem.querySelectorAll('input');
+        for (let i = 0; i < input.length; i++) {
+            if (input && input.length > 0) {
+                input[i].addEventListener('keyup', handleChange);
+            }
+        }
+    }, []);
     return (
         <div className="tree" dangerouslySetInnerHTML={{__html: stringAsTree}}></div>
     )
