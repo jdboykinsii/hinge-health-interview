@@ -5,7 +5,6 @@ import staticData from './data.json';
 
 export default function Tree() {
     const [animalTreeData, setAnimalTreeData] = useState(staticData);
-    const [newTreeData, setNewTreeData] = useState({});
 
     let stringAsTree = "";
     /*
@@ -46,18 +45,26 @@ export default function Tree() {
 
     const updateInTree = (tag, dataToAppend) => {
         const searchTree = (obj, tag) => {
-            for (const key in obj) {
-                if (obj.hasOwnProperty(key)) {
-                    if (key === tag) {
-                        obj[key] = {...obj[key], [dataToAppend]: {}};
-                    } else if (typeof obj[key] === 'object') {
-                        return searchTree(obj[key], tag);
-                    }
+
+            if (obj && Object.keys(obj).length === 0) {
+                return;
+            }
+
+            const entries = Object.entries(obj);
+
+            for(let i = 0; i < entries.length; i++){
+                const [key] = entries[i];
+
+                if(key === tag){
+                    obj[tag] = {...obj[tag], [dataToAppend]: {}};
+                } else {
+                    searchTree(obj[key], tag);
                 }
             }
         }
 
-        let treeClone = Object.assign(animalTreeData);
+        let treeClone = Object.assign({}, animalTreeData);
+
         searchTree(treeClone, tag);
 
         return treeClone;
@@ -72,11 +79,13 @@ export default function Tree() {
 
             setAnimalTreeData(newTreeData);
 
+            parseTree(animalTreeData);
+
             evt.target.value = "";
         }
     }
 
-    useEffect(() => {
+    const bindEventHandlers = () => {
         const treeElem = document.querySelector('.tree');
         const input = treeElem.querySelectorAll('input');
         for (let i = 0; i < input.length; i++) {
@@ -84,7 +93,12 @@ export default function Tree() {
                 input[i].addEventListener('keyup', handleChange);
             }
         }
-    }, []);
+    }
+
+    useEffect(() => {
+        bindEventHandlers();
+    }, [animalTreeData]);
+
     return (
         <div className="tree" dangerouslySetInnerHTML={{__html: stringAsTree}}></div>
     )
