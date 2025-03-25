@@ -1,1 +1,12 @@
-{}
+{
+  "mammals" : {
+    "cheetah": {},
+    "bear": {
+      "lion": {},
+      "dog": {
+        "elephant": {}
+      }
+    },
+    "ape": {}
+  }
+}
