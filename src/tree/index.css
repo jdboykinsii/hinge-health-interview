@@ -4,3 +4,6 @@
     padding: 10px;
     font-family: monospace
 }
+ul.animalTree, ul.animalTree ul {
+    list-style:none;
+}
